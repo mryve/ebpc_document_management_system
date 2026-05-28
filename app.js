@@ -129,7 +129,10 @@ app.get('/folder/:dir',checkSession, (req, res) => {
     let f = fs.readdirSync(path.join(folderPath, req.params.dir));
     let files = [];
     f.forEach((fl) => {
-        files.push({filename: fl});
+        files.push({
+            filename: fl,
+            fileUrl: '/EBPC/' + encodeURIComponent(req.params.dir) + '/' + encodeURIComponent(fl)
+        });
     });
     if (f == null){
         files = null;
@@ -155,13 +158,27 @@ app.post('/create_folder',checkSession, (req, res) => {
 app.get('/upload',checkSession, (req, res) => {
     res.render('upload', {userName: req.user.username})
 })
+app.get('/upload/:dir',checkSession, (req, res) => {
+    res.render('upload', {userName: req.user.username, openedFolder: req.params.dir})
+})
 app.post("/upload_files", upload.single("myfile"), uploadFiles);
 
 function uploadFiles(req, res) {
     console.log(req.body);
     console.log(JSON.stringify(req.file));
-    fs.renameSync(`./upload/${req.file.filename}`,`./upload/${req.file.originalname}`);
-    res.json({ message: "Successfully uploaded files" });
+    if (!req.file) {
+        return res.status(400).send('No file uploaded');
+    }
+
+    const folder = req.body.folder;
+    const targetDir = path.join(__dirname, 'public', 'EBPC', folder || '');
+    if (!folder || !fs.existsSync(targetDir)) {
+        fs.unlinkSync(req.file.path);
+        return res.status(400).send('Invalid target folder');
+    }
+
+    fs.renameSync(req.file.path, path.join(targetDir, req.file.originalname));
+    res.redirect('/folder/' + encodeURIComponent(folder));
 }
 
 //login page
@@ -218,7 +235,7 @@ function checkSession(req, res, next) {
 }
 
 //start server
-app.listen(80, () => {
+app.listen(3000, () => {
     console.log('server is running')
 })
 

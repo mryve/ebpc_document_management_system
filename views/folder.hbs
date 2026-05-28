@@ -1,7 +1,9 @@
 {{#each files}}
 <div id="file-container" class="col">
-    <img src="/img/file.png" width="200px">
+    <a href="{{this.fileUrl}}" target="_blank">
+        <img src="/img/file.png" width="200px">
+    </a>
     <br>
-    <p>{{this.filename}}</p>
+    <a href="{{this.fileUrl}}" target="_blank">{{this.filename}}</a>
 </div>
 {{/each}}

@@ -4,7 +4,9 @@ function logout(){location.href = '/logout'}
 
 function createFolder(){location.href='/create_folder'}
 
-function upload(){location.href="/upload"}
+function upload(value){
+    location.href = value ? '/upload/' + encodeURIComponent(value) : '/upload'
+}
 
 function files(value){
     location.href = '/folder/' + value
